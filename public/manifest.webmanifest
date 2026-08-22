@@ -1,0 +1,10 @@
+{
+  "name": "Aviary Pro",
+  "short_name": "Aviary Pro",
+  "description": "Bird breeding, inventory, sales and financial management.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f8f8",
+  "theme_color": "#0f2522",
+  "icons": []
+}
