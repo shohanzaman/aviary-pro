@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
 
 const stats = [
   { label: "Total Birds", value: "32", note: "+4 this month", icon: "🐦" },
@@ -19,7 +21,44 @@ const modules = [
 ];
 
 export default function Home() {
+  const router = useRouter();
   const [active, setActive] = useState("Dashboard");
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      if (!data.session) {
+        router.replace("/login");
+        return;
+      }
+      setEmail(data.session.user.email ?? "");
+      setCheckingAuth(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) router.replace("/login");
+      else setEmail(session.user.email ?? "");
+    });
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [router]);
+
+  async function logout() {
+    await supabase.auth.signOut();
+    router.replace("/login");
+    router.refresh();
+  }
+
+  if (checkingAuth) {
+    return <main className="auth-loading">Loading Aviary Pro…</main>;
+  }
 
   return (
     <main className="app-shell">
@@ -32,13 +71,15 @@ export default function Home() {
             </button>
           ))}
         </nav>
-        <div className="sidebar-bottom"><button className="nav-item"><span>⚙</span>Settings</button></div>
+        <div className="sidebar-bottom">
+          <button className="nav-item" onClick={logout}><span>↪</span>Logout</button>
+        </div>
       </aside>
 
       <section className="content">
         <header className="topbar">
           <div><p className="eyebrow">AVIARY PRO</p><h1>{active}</h1></div>
-          <div className="profile"><span className="online" /> SZ</div>
+          <button className="profile profile-button" title={email} onClick={logout}><span className="online" /> SZ</button>
         </header>
 
         <div className="welcome"><div><h2>Good evening 👋</h2><p>Here&apos;s what&apos;s happening in your aviary today.</p></div><button className="primary">+ Add Bird</button></div>
