@@ -106,20 +106,21 @@ export default function BirdsPage() {
     const user = sessionData.session?.user;
     if (!user) {
       router.replace("/login");
+      setSaving(false);
       return;
     }
 
     const payload = {
       bird_code: form.bird_code.trim(),
-      name: form.name.trim() || null,
+      name: form.name?.trim() || null,
       species: form.species.trim(),
-      mutation: form.mutation.trim() || null,
+      mutation: form.mutation?.trim() || null,
       sex: form.sex,
       date_of_birth: form.date_of_birth || null,
-      ring_id: form.ring_id.trim() || null,
+      ring_id: form.ring_id?.trim() || null,
       status: form.status,
       purchase_price: Number(form.purchase_price) || 0,
-      notes: form.notes.trim() || null,
+      notes: form.notes?.trim() || null,
     };
 
     const result = editingId
